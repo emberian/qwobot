@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          path: qwobot
 
       - name: Checkout spweeboard-core
         uses: actions/checkout@v4
@@ -30,9 +30,12 @@ jobs:
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: qwobot
 
       - name: Run cargo check
         run: cargo check --all-targets
+        working-directory: qwobot
 
   fmt:
     name: Rustfmt
@@ -54,7 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          path: qwobot
 
       - name: Checkout spweeboard-core
         uses: actions/checkout@v4
@@ -70,6 +73,9 @@ jobs:
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: qwobot
 
       - name: Run clippy
         run: cargo clippy --all-targets -- -D warnings
+        working-directory: qwobot
