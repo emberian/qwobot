@@ -1,0 +1,45 @@
+[package]
+name = "qwobot"
+version = "0.1.0"
+edition = "2021"
+description = "Discord bot serving local LLMs via llama.cpp"
+license = "MIT"
+
+[dependencies]
+# Discord
+poise = "0.6"
+
+# LLM - llama.cpp bindings
+llama-cpp-2 = "0.1"
+hf-hub = "0.3"
+
+# SPW symbolic keyboard
+spweeboard-core = { path = "../spweebo'ard/crates/spweeboard-core" }
+
+# Async
+tokio = { version = "1", features = ["full"] }
+
+# HTTP client for prompt fetching
+reqwest = { version = "0.12", features = ["rustls-tls"], default-features = false }
+
+# Hashing for change detection
+sha2 = "0.10"
+
+# Config
+config = "0.14"
+dotenvy = "0.15"
+serde = { version = "1", features = ["derive"] }
+
+# Error handling
+thiserror = "1"
+anyhow = "1"
+
+# Random
+rand = "0.8"
+
+# Regex for output processing
+regex = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

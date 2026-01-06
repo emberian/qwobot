@@ -1,0 +1,19 @@
+# Qwobot Default Configuration
+
+# Model settings
+# model_id can be:
+#   - Local GGUF file path: "/path/to/model.gguf"
+#   - HuggingFace repo: "Qwen/Qwen3-0.6B" (will look for GGUF in {repo}-GGUF)
+model_id = "Qwen/Qwen3-0.6B"
+
+# Quantization level (used to find the right GGUF file)
+# Common values: Q4_K_M, Q8_0, Q6_K, Q5_K_M, Q3_K_M, Q2_K
+# Note: Qwen3-0.6B-GGUF only has Q8_0 available
+quantization = "Q8_0"
+
+# Generation settings
+max_tokens = 1024
+temperature = 0.7
+
+# Discord settings (token should come from environment)
+# prefix = "!"  # Optional prefix for text commands
