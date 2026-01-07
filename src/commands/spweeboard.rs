@@ -91,6 +91,12 @@ pub async fn spweeboard(
     }
     trace!("All characters pushed");
 
+    // Check for parse errors before attempting generation
+    if engine.current_expression().is_none() {
+        let error_msg = format!("Failed to parse SPW expression: {}", expression);
+        return Err(crate::error::QwobotError::SpwParse(error_msg).into());
+    }
+
     // Generate interpretation
     info!("Starting SPW interpretation generation");
     let raw_result = engine.generate().await?;

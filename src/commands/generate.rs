@@ -1,4 +1,16 @@
 use super::{log_command_source, Context, Error};
+use regex::Regex;
+use std::sync::LazyLock;
+
+/// Regex to match and remove <think>...</think> blocks (including partial/unclosed)
+static THINK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?s)<think>.*?(</think>|$)").unwrap()
+});
+
+/// Strip thinking tags from model output
+fn strip_thinking(output: &str) -> String {
+    THINK_REGEX.replace_all(output, "").trim().to_string()
+}
 
 /// Complete text from a prompt using the loaded LLM
 #[poise::command(slash_command, prefix_command)]
@@ -13,7 +25,8 @@ pub async fn complete(
     // Defer response for long-running operations
     ctx.defer().await?;
 
-    let response = ctx.data().llm.generate(&prompt).await?;
+    let raw_response = ctx.data().llm.generate(&prompt).await?;
+    let response = strip_thinking(&raw_response);
 
     // Format with prompt preview
     let prompt_preview = if prompt.len() > 100 {

@@ -23,7 +23,7 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(
             tracing_subscriber::EnvFilter::from_default_env()
                 .add_directive("qwobot=trace".parse()?)
-                .add_directive("spweeboard_core=trace".parse()?),
+                .add_directive("spweeboard_core=info".parse()?),
         )
         .init();
 

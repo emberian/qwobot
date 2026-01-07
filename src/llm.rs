@@ -60,13 +60,19 @@ fn resolve_model_path(model_id: &str, quantization: &str) -> Result<PathBuf> {
 
         let api = Api::new().map_err(|e| QwobotError::ModelLoad(format!("HF API error: {e}")))?;
 
-        // Try the GGUF variant repo first (e.g., "Qwen/Qwen3-0.6B-GGUF")
-        let gguf_repo = format!("{}-GGUF", model_id);
+        // Check if repo already has -GGUF suffix to avoid duplication
+        let (gguf_repo, base_repo) = if model_id.ends_with("-GGUF") {
+            (model_id.to_string(), model_id.trim_end_matches("-GGUF").to_string())
+        } else {
+            (format!("{}-GGUF", model_id), model_id.to_string())
+        };
         let quant_lower_underscore = quantization.to_lowercase(); // q8_0
         let quant_lower_hyphen = quant_lower_underscore.replace('_', "-"); // q8-0
 
         // Common GGUF filename patterns to try
-        let model_name = model_id.split('/').last().unwrap_or("model");
+        // Strip -GGUF from model name if present (for filename generation)
+        let raw_model_name = model_id.split('/').last().unwrap_or("model");
+        let model_name = raw_model_name.trim_end_matches("-GGUF");
         let model_name_lower = model_name.to_lowercase();
         let quant_upper = quantization.to_uppercase().replace('-', "_");
         let filenames = [
@@ -94,10 +100,10 @@ fn resolve_model_path(model_id: &str, quantization: &str) -> Result<PathBuf> {
             }
         }
 
-        // Fall back to original repo
-        let repo = api.model(model_id.to_string());
+        // Fall back to base repo (without -GGUF suffix)
+        let repo = api.model(base_repo.clone());
         for filename in &filenames {
-            debug!("Trying to download: {}/{}", model_id, filename);
+            debug!("Trying to download: {}/{}", base_repo, filename);
             if let Ok(path) = repo.get(filename) {
                 info!("Downloaded model to: {}", path.display());
                 return Ok(path);
@@ -106,7 +112,7 @@ fn resolve_model_path(model_id: &str, quantization: &str) -> Result<PathBuf> {
 
         return Err(QwobotError::ModelLoad(format!(
             "Could not find GGUF file in {} or {}. Tried filenames: {:?}",
-            gguf_repo, model_id, filenames
+            gguf_repo, base_repo, filenames
         )));
     }
 
@@ -140,13 +146,19 @@ async fn resolve_model_path_with_progress(
 
             let api = Api::new().map_err(|e| QwobotError::ModelLoad(format!("HF API error: {e}")))?;
 
-            // Try the GGUF variant repo first (e.g., "Qwen/Qwen3-0.6B-GGUF")
-            let gguf_repo = format!("{}-GGUF", model_id);
+            // Check if repo already has -GGUF suffix to avoid duplication
+            let (gguf_repo, base_repo) = if model_id.ends_with("-GGUF") {
+                (model_id.clone(), model_id.trim_end_matches("-GGUF").to_string())
+            } else {
+                (format!("{}-GGUF", model_id), model_id.clone())
+            };
             let quant_lower_underscore = quantization.to_lowercase(); // q8_0
             let quant_lower_hyphen = quant_lower_underscore.replace('_', "-"); // q8-0
 
             // Common GGUF filename patterns to try
-            let model_name = model_id.split('/').last().unwrap_or("model");
+            // Strip -GGUF from model name if present (for filename generation)
+            let raw_model_name = model_id.split('/').last().unwrap_or("model");
+            let model_name = raw_model_name.trim_end_matches("-GGUF");
             let model_name_lower = model_name.to_lowercase();
             let quant_upper = quantization.to_uppercase().replace('-', "_");
             let filenames = [
@@ -176,10 +188,10 @@ async fn resolve_model_path_with_progress(
                 }
             }
 
-            // Fall back to original repo
-            let repo = api.model(model_id.clone());
+            // Fall back to base repo (without -GGUF suffix)
+            let repo = api.model(base_repo.clone());
             for filename in &filenames {
-                debug!("Trying to download: {}/{}", model_id, filename);
+                debug!("Trying to download: {}/{}", base_repo, filename);
                 if let Ok(path) = repo.get(filename) {
                     info!("Downloaded model to: {}", path.display());
                     return Ok(path);
@@ -188,7 +200,7 @@ async fn resolve_model_path_with_progress(
 
             return Err(QwobotError::ModelLoad(format!(
                 "Could not find GGUF file in {} or {}. Tried filenames: {:?}",
-                gguf_repo, model_id, filenames
+                gguf_repo, base_repo, filenames
             )));
         }
 

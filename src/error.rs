@@ -16,6 +16,9 @@ pub enum QwobotError {
 
     #[error("Discord error: {0}")]
     Discord(String),
+
+    #[error("SPW parse failed: {0}")]
+    SpwParse(String),
 }
 
 pub type Result<T> = std::result::Result<T, QwobotError>;
